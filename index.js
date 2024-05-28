@@ -17,9 +17,20 @@ const getFilesCount = (dirPath) => {
   }
 };
 
-
 let startPingTime = Date.now();
 let botStartTime = Date.now(); 
+
+// Assuming harold is an object that should be defined somewhere
+const harold = {
+  BotOwner: 'OwnerName',
+  adminbot: 'AdminUID',
+  BotName: 'BotOwnerName',
+  name: 'BotName',
+  FCA: 'FCAValue',
+  REPL: 'ReplValue',
+  language: 'LanguageValue',
+  prefix: '!',
+};
 
 async function getBotInformation() {
   return {
@@ -35,7 +46,7 @@ async function getBotInformation() {
       repl: harold.REPL,
       lang: harold.language,
       ping: Date.now() - startPingTime,
-      },
+    },
     fca: {
       module: config.FCA,
     }
@@ -45,7 +56,6 @@ async function getBotInformation() {
 function sendLiveData(socket) {
   setInterval(() => {
     const uptime = Date.now() - botStartTime;
-
     socket.emit('real-time-data', { uptime });
   }, 1000); 
 }
@@ -57,16 +67,11 @@ app.get('/dashboard', async (req, res) => {
   const botInformation = await getBotInformation();
 
   res.json({
-    owner:
-     botInformation.bot.owner,
-    botPing:
-     botInformation.bot.ping,
-    botLang:
-  botInformation.bot.lang,
-    botRepl:
-     botInformation.bot.repl,
-    botFmd:
-    botInformation.bot.fmd,
+    owner: botInformation.bot.owner,
+    botPing: botInformation.bot.ping,
+    botLang: botInformation.bot.lang,
+    botRepl: botInformation.bot.repl,
+    botFmd: botInformation.bot.fmd,
     botName: botInformation.bot.name,
     botUid: botInformation.bot.uid,
     ownerName: botInformation.owner.name,
@@ -79,7 +84,6 @@ app.get('/dashboard', async (req, res) => {
 });
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'harold.html')));
-
 
 const http = require('http');
 const { Server } = require("socket.io");
@@ -95,27 +99,28 @@ io.on('connection', (socket) => {
   });
 });
 
-// Monitor setup
 const Monitor = require('ping-monitor');
 var haroldUrl = `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`;
 const monitor = new Monitor({ website: haroldUrl, title: 'NAME', interval: 20 });
 monitor.on('up', (res) => console.log(`[ ${haroldUrl} ] Has been Uptimed.`));
+
 function startBot() {
   const child = spawn("node", ["--trace-warnings", "--async-stack-traces", "main.js"], {
       cwd: __dirname,
       stdio: "inherit",
       shell: true
-});
+  });
   
   child.on("error", (error) => {
     console.error(`An error occurred starting the bot: ${error}`);
-    });
+  });
 }
-// Server setup
-const port = process.env.PORT || 3030 || 3000 || 8080;
+
+const port = process.env.PORT || 3030;
 app.listen(port, () => {
   console.log(`Listen on port ${port}`);
 });
+
 process.on('unhandledRejection', (err, p) => {});
 process.on('uncaughtException', (err) => {
   console.error('There was an uncaught error:', err);
@@ -126,6 +131,3 @@ process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
   process.exit(1);
 });
-/* This is simple bot made by Deku, please don't steal it without credits :(
-if you're encounter any error or bug, contact me at https://facebook.com/joshg101
-*/
